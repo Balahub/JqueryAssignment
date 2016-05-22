@@ -1,0 +1,23 @@
+/*
+  960 Grid System Example ~ Style CSS.
+
+
+
+*/
+/* Basic HTML Styling for Header ,Three column Aside ,Footer with Social Network Links and the Hero Element
+----------------------------------------------------------------------------------------------------*/
+
+.axis {
+    font: 13px comic,sans-serif;
+  }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke:#000;
+    shape-rendering: crispEdges;
+    }
+    svg{
+      display:block;
+    margin:auto;
+}

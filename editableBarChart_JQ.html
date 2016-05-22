@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Json JPut</title>
+
+    <link href="./includes/css/bootstrap.min.css" rel="stylesheet">
+	<link href="./includes/css/style.css" rel="stylesheet">
+	<script src="./includes/js/jquery-2.2.3.js"></script>
+	<script src="./includes/js/d3.min.js"></script>
+	<script src="scripts.js" />
+	
+	
+	<script src="./includes/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+  <script>		
+  var learray = [];
+ var json = [];
+
+ 
+var request = new XMLHttpRequest();
+   request.open("GET", "Total.json", false);
+   request.send(null);
+   var jsonRects = JSON.parse(request.responseText);
+
+   
+   $(document).ready(function(){
+                $('#source').jPut({
+                    jsonData:jsonRects,
+					//ajax_url:'Total.json',
+					name:'table_template'
+				});
+				graph(jsonRects);
+				
+});
+
+
+function graph(learray){
+
+var data = learray;
+console.log("data:"+data);
+
+
+	var margin={top:20,right:20,bottom:20,left:120},
+	width=600-margin.left-margin.right,
+	height=300-margin.top-margin.bottom;
+
+
+    //setting scales for both axes
+    var xAxisScale=d3.scale.ordinal().rangeRoundBands([0,width],.5);
+    var yAxisScale=d3.scale.linear().domain([4000,4020]).range([height,0]);
+
+    //scaling the axes
+    var xAxis=d3.svg.axis().scale(xAxisScale).orient("bottom");
+    var yAxis=d3.svg.axis().scale(yAxisScale).orient("left").ticks(10);
+
+    //appending svg to div
+    var svg=d3.select("#target").append("svg").attr("height",height+margin.top+margin.bottom).attr("width",width+margin.left+margin.right)
+    .append("g").attr("transform","translate("+margin.left+","+margin.top+")");
+
+      data.forEach(function(d){
+
+        d.country=d.country;
+        d.LifeExp=parseFloat(d.LifeExp);
+   
+	console.log(d.country);
+	console.log(d.LifeExp);
+
+
+      //mapping data to x and y axes
+      xAxisScale.domain(data.map(function(d){return d.country}));
+      yAxisScale.domain([4100,d3.max(data,function(d){return d.LifeExp})]);
+
+      //colors
+      var color=d3.scale.linear().domain([4100,4190]).range(["red","blue"]);
+
+
+      //calling the axis functions and assigning classes to them to put css styles
+
+      //call for x-axis
+      svg.append("g").attr("class","x axis").attr("transform","translate(0,"+height+")").call(xAxis)
+      .selectAll("text").attr("transform","translate(2,2)");
+
+      //call for y axis
+	  console.log(d.LifeExp);
+      svg.append("g").attr("class","y axis").call(yAxis)
+      .append("text").attr("y",(4000-d3.max(data,function(d){return d.LifeExp}))/2).style("vertical-align","center").attr("x",-170).text("Life Expectancy(in years)").attr("transform","rotate(-90)");
+
+      //appending bars
+      svg.selectAll("barChart").data(data).enter()
+      .append("rect").attr({
+        x:function(d){return xAxisScale(d.country)},
+        y:function(d){return yAxisScale(d.LifeExp)},
+        height:function(d){return height-yAxisScale(d.LifeExp)},
+        width:xAxisScale.rangeBand(),
+        fill:function(d){return color(d.LifeExp)}
+     });
+	 });
+    }
+	
+	
+	function deleteRowFunction(btndel) {
+		if (typeof(btndel) == "object") {
+			var a = $(btndel).closest("tr").children("td").slice(0,2).text();
+			$(btndel).closest("tr").remove();
+			for(var i=0;i<jsonRects.length;i++){
+				if(jsonRects[i].country == a){
+					 jsonRects.splice(i,1);
+				}
+			}
+			
+			$("svg").find("*").remove();
+			graph(jsonRects);
+			// svg repositioning
+			$("svg").css({top: 200, left: 200, position:'absolute'});
+}
+		 else {
+			return false;
+		}
+	}
+
+
+  </script>
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-6" onload="alert('hi');">
+			<table class="table" id="source">
+				<thead>
+					<tr>
+					<th>Delete Buttons</th>
+					<th>Country</th>
+					<th>LifeExpectancy</th>
+					</tr>
+				</thead>
+				<tbody jput="table_template" id="output">
+				<tr>
+				<td><input type="button" value="Delete Row" onclick="deleteRowFunction(this);"></td>
+				<td>{{country}}</td>
+				<td>{{LifeExp}}</td>
+				</tr>
+				</tbody>
+				</table>
+	</div>
+		
+		<div class="col-md-6" id="target">
+		<br>>
+			<h1>Bar chart of Top 5 countries with highest Life expectancy at birth, total (years) in the given time period of 1960 - 2015</h1>
+			
+	</div>
+	</div>
+</div>
+   
+   <script src="./includes/js/jput.min.js"></script>
+  </body>
+</html>
